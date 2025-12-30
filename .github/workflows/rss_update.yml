@@ -1,0 +1,26 @@
+name: Update Bankier RSS
+on:
+  schedule:
+    - cron: '0 * * * *' # Co godzinę
+  workflow_dispatch: # Możliwość ręcznego odpalenia
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      - name: Install dependencies
+        run: pip install requests beautifulsoup4 feedgen pytz
+      - name: Run scraper
+        run: python bankier_rss.py
+      - name: Commit and push if changed
+        run: |
+          git config --global user.name 'RSS-Bot'
+          git config --global user.email 'bot@github.com'
+          git add bankier_news.xml
+          git commit -m "Update RSS feed" || exit 0
+          git push
